@@ -18,8 +18,8 @@ Usage::
 from __future__ import absolute_import
 
 __title__ = 'internetarchive'
-__version__ = '1.0.2'
-__author__ = 'Jacob M. Johnson'
+__version__ = '1.0.2.1'
+__author__ = 'Jacob M. Johnson and ethus3h'
 __license__ = 'AGPL 3'
 __copyright__ = 'Copyright 2015 Internet Archive'
 

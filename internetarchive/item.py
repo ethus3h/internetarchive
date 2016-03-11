@@ -556,7 +556,8 @@ class Item(BaseItem):
                     response = self.session.send(prepared_request,
                                                  stream=True,
                                                  **request_kwargs)
-                    if (response.status_code == 503) and (retries > 0):
+                    status_to_retry = [500, 501, 502, 503, 504, 400, 408]
+                    if (response.status_code in status_to_retry) and (retries > 0):
                         log.info(error_msg)
                         if verbose:
                             print(' warning: {0}'.format(error_msg), file=sys.stderr)
@@ -564,7 +565,7 @@ class Item(BaseItem):
                         retries -= 1
                         continue
                     else:
-                        if response.status_code == 503:
+                        if response.status_code in status_to_retry:
                             log.info('maximum retries exceeded, upload failed.')
                         break
                 response.raise_for_status()

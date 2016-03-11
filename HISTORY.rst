@@ -3,6 +3,17 @@
 Release History
 ---------------
 
+1.0.2.1 (2016-03-10)
+++++++++++++++++++
+
+**Features and Improvements**
+
+- Retry on HTTP response codes 500, 501, 502, 503, 504, 400, and 408.
+
+**Miscellaneous**
+
+- Fork of jjjake/internetarchive.
+
 1.0.2 (2016-03-07)
 ++++++++++++++++++
 

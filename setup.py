@@ -19,9 +19,9 @@ with open('HISTORY.rst', 'r', 'utf-8') as f:
 setup(
     name='internetarchive',
     version=version,
-    url='https://github.com/jjjake/internetarchive',
+    url='https://github.com/ethus3h/internetarchive',
     license='AGPL 3',
-    author='Jacob M. Johnson',
+    author='Jacob M. Johnson; ethus3h',
     author_email='jake@archive.org',
     description='A python interface to archive.org.',
     long_description=readme,
