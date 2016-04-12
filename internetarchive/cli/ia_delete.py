@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+#
+# The internetarchive module is a Python/CLI interface to Archive.org.
+#
+# Copyright (C) 2012-2016 Internet Archive
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """Delete files from Archive.org.
 
 usage:
@@ -25,7 +44,7 @@ from six import text_type
 from docopt import docopt, printable_usage
 from schema import Schema, SchemaError, Use, Or, And
 
-from internetarchive.cli.argparser import get_xml_text
+from internetarchive.utils import get_s3_xml_text
 from internetarchive.utils import validate_ia_identifier
 
 
@@ -64,7 +83,7 @@ def main(argv, session):
         sys.stdout.write('Deleting files from {0}\n'.format(item.identifier))
 
     if args['--all']:
-        files = [f for f in item.iter_files()]
+        files = [f for f in item.get_files()]
         args['--cacade'] = True
     elif args['--glob']:
         files = item.get_files(glob_pattern=args['--glob'])
@@ -96,6 +115,6 @@ def main(argv, session):
             continue
         resp = f.delete(verbose=verbose, cascade_delete=args['--cascade'])
         if resp.status_code != 204:
-            msg = get_xml_text(resp.content)
+            msg = get_s3_xml_text(resp.content)
             sys.stderr.write(' error: {0} ({1})\n'.format(msg, resp.status_code))
             sys.exit(1)

@@ -9,10 +9,7 @@ import responses
 from internetarchive.cli import ia
 
 
-if sys.version_info < (2, 7, 9):
-    protocol = 'http:'
-else:
-    protocol = 'https:'
+protocol = 'https:'
 
 
 ROOT_DIR = os.getcwd()
@@ -134,7 +131,7 @@ def test_ia_upload_403(capsys):
             assert exc.code == 1
 
     out, err = capsys.readouterr()
-    assert 'error uploading test_ia_upload.py to nasa, 403' in err
+    assert 'error uploading test_ia_upload.py' in err
 
 
 def test_ia_upload_invalid_cmd(capsys):

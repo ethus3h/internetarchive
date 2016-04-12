@@ -3,6 +3,7 @@
 Release History
 ---------------
 
+<<<<<<< HEAD
 1.0.2.1 (2016-03-10)
 ++++++++++++++++++
 
@@ -13,6 +14,26 @@ Release History
 **Miscellaneous**
 
 - Fork of jjjake/internetarchive.
+=======
+1.0.3 (?)
++++++++++
+
+**Features and Improvements**
+
+- Use scrape API for getting total number of results rather than the advanced search API.
+- Improved error messages for IA-S3 (upload) related errors.
+
+**Bugfixes**
+
+- Updated ``requests`` lib version requirements.
+  This resolves issues with sending binary strings as bodies in Python 3.
+- Improved support for Windows, see `https://github.com/jjjake/internetarchive/issues/126 <https://github.com/jjjake/internetarchive/issues/126>`_ for more details.
+- Previously all requests were made in HTTP for Python versions < 2.7.9 due to the issues described at `https://urllib3.readthedocs.org/en/latest/security.html <https://urllib3.readthedocs.org/en/latest/security.html>`_.
+  In favor of security over convenience, all requests are now made via HTTPS regardless of Python version.
+  Refer to `http://internetarchive.readthedocs.org/en/latest/troubleshooting.html#https-issues <http://internetarchive.readthedocs.org/en/latest/troubleshooting.html#https-issues>`_ if you are experiencing issues.
+- Fixed bug in ``ia`` CLI where ``-insecure`` was still making HTTPS requests when it should have been making HTTP requests.
+- Fixed bug in ``ia delete`` where ``-all`` option wasn't working because it was using ``item.iter_files`` instead of ``item.get_files``.
+>>>>>>> jjjake/master
 
 1.0.2 (2016-03-07)
 ++++++++++++++++++
@@ -50,6 +71,12 @@ Release History
 - Added retry support to download and metadata retrieval.
 - Added ``Collection`` object.
 - Made ``Item`` objects hashable and orderable.
+
+**Bugfixes**
+
+- IA's Advanced Search API no longer supports deep-paging of large result sets.
+  All search functions have been refactored to use the new Scrape API (http://archive.org/help/aboutsearch.htm).
+  Search functions in previous versions are effictively broken, upgrade to >=1.0.0.
 
 0.9.8 (2015-11-09)
 ++++++++++++++++++

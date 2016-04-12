@@ -1,27 +1,33 @@
 # -*- coding: utf-8 -*-
+#
+# The internetarchive module is a Python/CLI interface to Archive.org.
+#
+# Copyright (C) 2012-2016 Internet Archive
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 internetarchive.cli.argparser
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:copyright: (c) 2015 Internet Archive.
+:copyright: (C) 2012-2016 by Internet Archive.
 :license: AGPL 3, see LICENSE for more details.
 """
 from collections import defaultdict
 from xml.dom.minidom import parseString
 
 from six.moves.urllib.parse import parse_qsl
-
-
-def get_xml_text(xml_str, tag_name=None, text=None):
-    tag_name = 'Message' if not tag_name else tag_name
-    text = '' if not text else text
-    p = parseString(xml_str)
-    elements = p.getElementsByTagName(tag_name)
-    for e in elements:
-        for node in e.childNodes:
-            if node.nodeType == node.TEXT_NODE:
-                text += node.data
-    return text
 
 
 def get_args_dict(args, query_string=False):

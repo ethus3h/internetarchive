@@ -1,9 +1,27 @@
 # -*- coding: utf-8 -*-
+#
+# The internetarchive module is a Python/CLI interface to Archive.org.
+#
+# Copyright (C) 2012-2016 Internet Archive
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 internetarchive.item
 ~~~~~~~~~~~~~~~~~~~~
 
-:copyright: (c) 2015 by Internet Archive.
+:copyright: (C) 2012-2016 by Internet Archive.
 :license: AGPL 3, see LICENSE for more details.
 """
 from __future__ import absolute_import, unicode_literals, print_function
@@ -28,6 +46,7 @@ from internetarchive.utils import IdentifierListAsItems, get_md5, chunk_generato
     IterableToFileAdapter
 from internetarchive.files import File
 from internetarchive.iarequest import MetadataRequest, S3Request
+from internetarchive.utils import get_s3_xml_text, get_file_size
 from internetarchive import __version__
 
 
@@ -457,29 +476,15 @@ class Item(BaseItem):
         if not hasattr(body, 'read'):
             body = open(body, 'rb')
 
-        if not metadata.get('scanner'):
-            scanner = 'Internet Archive Python library {0}'.format(__version__)
-            metadata['scanner'] = scanner
-
-        try:
-            body.seek(0, os.SEEK_END)
-            size = body.tell()
-            # Avoid OverflowError.
-            if size > sys.maxsize:
-                size = None
-            body.seek(0, os.SEEK_SET)
-        except IOError:
-            size = None
+        size = get_file_size(body)
 
         if not headers.get('x-archive-size-hint'):
             headers['x-archive-size-hint'] = size
 
+        # Build IA-S3 URL.
         key = body.name.split('/')[-1] if key is None else key
-        base_url = '{protocol}//s3.us.archive.org/{identifier}'.format(
-            protocol=self.session.protocol,
-            identifier=self.identifier)
-        url = '{base_url}/{key}'.format(base_url=base_url,
-                                        key=key.lstrip('/'))
+        base_url = '{0.session.protocol}//s3.us.archive.org/{0.identifier}'.format(self)
+        url = '{0}/{1}'.format(base_url, key.lstrip('/'))
 
         # Skip based on checksum.
         if checksum:
@@ -579,13 +584,14 @@ class Item(BaseItem):
                     os.remove(body.name)
                 return response
             except HTTPError as exc:
+                msg = get_s3_xml_text(exc.response.content)
                 error_msg = (' error uploading {0} to {1}, '
-                             '{2}'.format(key, self.identifier, exc))
+                             '{2}'.format(key, self.identifier, msg))
                 log.error(error_msg)
                 if verbose:
-                    print(error_msg, file=sys.stderr)
+                    print(' error uploading {0}: {1}'.format(key, msg), file=sys.stderr)
                 # Raise HTTPError with error message.
-                raise type(exc)(error_msg)
+                raise type(exc)(error_msg, response=exc.response, request=exc.request)
 
     def upload(self, files,
                metadata=None,

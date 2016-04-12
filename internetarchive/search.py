@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+#
+# The internetarchive module is a Python/CLI interface to Archive.org.
+#
+# Copyright (C) 2012-2016 Internet Archive
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 internetarchive.search
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -6,7 +24,7 @@ internetarchive.search
 This module provides objects for interacting with the Archive.org
 search engine.
 
-:copyright: (c) 2015 by Internet Archive.
+:copyright: (C) 2012-2016 by Internet Archive.
 :license: AGPL 3, see LICENSE for more details.
 """
 from __future__ import absolute_import, unicode_literals
@@ -88,9 +106,7 @@ class Search(object):
 
         self.params['output'] = 'json'
 
-        r = self.session.get(self.search_url,
-                             params=self.params,
-                             **self.request_kwargs)
+        r = self.session.get(self.search_url, params=self.params, **self.request_kwargs)
         j = r.json()
         for item in j.get('response', {}).get('docs', []):
             yield item
@@ -100,8 +116,7 @@ class Search(object):
             self.params['fields'] = ','.join(self.fields)
         if self.sorts:
             self.params['sorts'] = ','.join(self.sorts)
-        remaining = True
-        while remaining:
+        while True:
             r = self.session.get(self.scrape_url,
                                  params=self.params,
                                  **self.request_kwargs)
@@ -124,10 +139,10 @@ class Search(object):
     @property
     def num_found(self):
         if not self._num_found:
-            p = dict(q=self.params['q'], rows=0, output='json')
-            r = self.session.get(self.search_url, params=p, **self.request_kwargs)
+            p = dict(q=self.params['q'], total_only='true')
+            r = self.session.get(self.scrape_url, params=p, **self.request_kwargs)
             j = r.json()
-            self._num_found = j.get('response', {}).get('numFound')
+            self._num_found = j.get('total')
         return self._num_found
 
     def _get_item_from_search_result(self, search_result):
