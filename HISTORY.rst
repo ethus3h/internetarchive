@@ -3,6 +3,15 @@
 Release History
 ---------------
 
+1.0.2.3 (2016-04-11a12)
+
+++++++++++++++++++
+
+**Miscellaneous**
+
+-Update version number, d'ohyyy
+
+
 1.0.2.2 (2016-04-11a12)
 
 ++++++++++++++++++
