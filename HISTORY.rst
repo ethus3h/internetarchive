@@ -9,7 +9,7 @@ Release History
 
 **Miscellaneous**
 
--Update version number, d'ohyyy
+-Unbreaking it.
 
 
 1.0.2.2 (2016-04-11a12)

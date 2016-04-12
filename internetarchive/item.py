@@ -543,6 +543,7 @@ class Item(BaseItem):
         if debug:
             return _build_request()
         else:
+            attempts = 0
             while attempts < 10:
                 try:
                     try:
