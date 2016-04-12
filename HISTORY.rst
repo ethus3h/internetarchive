@@ -3,7 +3,18 @@
 Release History
 ---------------
 
-<<<<<<< HEAD
+1.0.2.2 (2016-04-11a12)
+
+++++++++++++++++++
+
+**Features and Improvements**
+
+- Radical retry
+
+**Miscellaneous**
+
+-Pull in changes from upstream
+
 1.0.2.1 (2016-03-10)
 ++++++++++++++++++
 
@@ -33,7 +44,6 @@ Release History
   Refer to `http://internetarchive.readthedocs.org/en/latest/troubleshooting.html#https-issues <http://internetarchive.readthedocs.org/en/latest/troubleshooting.html#https-issues>`_ if you are experiencing issues.
 - Fixed bug in ``ia`` CLI where ``-insecure`` was still making HTTPS requests when it should have been making HTTP requests.
 - Fixed bug in ``ia delete`` where ``-all`` option wasn't working because it was using ``item.iter_files`` instead of ``item.get_files``.
->>>>>>> jjjake/master
 
 1.0.2 (2016-03-07)
 ++++++++++++++++++

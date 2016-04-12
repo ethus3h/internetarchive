@@ -543,55 +543,60 @@ class Item(BaseItem):
         if debug:
             return _build_request()
         else:
-            try:
-                error_msg = ('s3 is overloaded, sleeping for '
-                             '{0} seconds and retrying. '
-                             '{1} retries left.'.format(retries_sleep, retries))
-                while True:
-                    if retries > 0:
-                        if self.session.s3_is_overloaded(access_key):
-                            sleep(retries_sleep)
-                            log.info(error_msg)
-                            if verbose:
-                                print(' warning: {0}'.format(error_msg), file=sys.stderr)
-                            retries -= 1
-                            continue
-                    request = _build_request()
-                    prepared_request = request.prepare()
-                    response = self.session.send(prepared_request,
-                                                 stream=True,
-                                                 **request_kwargs)
-                    status_to_retry = [500, 501, 502, 503, 504, 400, 408]
-                    if (response.status_code in status_to_retry) and (retries > 0):
-                        log.info(error_msg)
+            while attempts < 10:
+                try:
+                    try:
+                        error_msg = ('s3 is overloaded, sleeping for '
+                                     '{0} seconds and retrying. '
+                                     '{1} retries left.'.format(retries_sleep, retries))
+                        while True:
+                            if retries > 0:
+                                if self.session.s3_is_overloaded(access_key):
+                                    sleep(retries_sleep)
+                                    log.info(error_msg)
+                                    if verbose:
+                                        print(' warning: {0}'.format(error_msg), file=sys.stderr)
+                                    retries -= 1
+                                    continue
+                            request = _build_request()
+                            prepared_request = request.prepare()
+                            response = self.session.send(prepared_request,
+                                                         stream=True,
+                                                         **request_kwargs)
+                            status_to_retry = [500, 501, 502, 503, 504, 400, 408]
+                            if (response.status_code in status_to_retry) and (retries > 0):
+                                log.info(error_msg)
+                                if verbose:
+                                    print(' warning: {0}'.format(error_msg), file=sys.stderr)
+                                sleep(retries_sleep)
+                                retries -= 1
+                                continue
+                            else:
+                                if response.status_code in status_to_retry:
+                                    log.info('maximum retries exceeded, upload failed.')
+                                break
+                        response.raise_for_status()
+                        log.info('uploaded {f} to {u}'.format(f=key, u=url))
+                        if delete and response.status_code == 200:
+                            log.info(
+                                '{f} successfully uploaded to '
+                                'https://archive.org/download/{i}/{f} and verified, deleting '
+                                'local copy'.format(i=self.identifier,
+                                                    f=key))
+                            os.remove(body.name)
+                        return response
+                    except HTTPError as exc:
+                        msg = get_s3_xml_text(exc.response.content)
+                        error_msg = (' error uploading {0} to {1}, '
+                                     '{2}'.format(key, self.identifier, msg))
+                        log.error(error_msg)
                         if verbose:
-                            print(' warning: {0}'.format(error_msg), file=sys.stderr)
-                        sleep(retries_sleep)
-                        retries -= 1
-                        continue
-                    else:
-                        if response.status_code in status_to_retry:
-                            log.info('maximum retries exceeded, upload failed.')
-                        break
-                response.raise_for_status()
-                log.info('uploaded {f} to {u}'.format(f=key, u=url))
-                if delete and response.status_code == 200:
-                    log.info(
-                        '{f} successfully uploaded to '
-                        'https://archive.org/download/{i}/{f} and verified, deleting '
-                        'local copy'.format(i=self.identifier,
-                                            f=key))
-                    os.remove(body.name)
-                return response
-            except HTTPError as exc:
-                msg = get_s3_xml_text(exc.response.content)
-                error_msg = (' error uploading {0} to {1}, '
-                             '{2}'.format(key, self.identifier, msg))
-                log.error(error_msg)
-                if verbose:
-                    print(' error uploading {0}: {1}'.format(key, msg), file=sys.stderr)
-                # Raise HTTPError with error message.
-                raise type(exc)(error_msg, response=exc.response, request=exc.request)
+                            print(' error uploading {0}: {1}'.format(key, msg), file=sys.stderr)
+                        # Raise HTTPError with error message.
+                        raise type(exc)(error_msg, response=exc.response, request=exc.request)
+                except:
+                    attempts += 1
+                    print("error; retrying")
 
     def upload(self, files,
                metadata=None,
