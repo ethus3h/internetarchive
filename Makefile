@@ -1,6 +1,6 @@
 .PHONY: docs
 
-VERSION=$(shell grep -m1 version internetarchive/__init__.py | cut -d\' -f2)
+VERSION=$(shell grep -m1 __version__ internetarchive/__init__.py | cut -d\' -f2)
 
 init:
 	pip install responses==0.5.0 pytest-cov pytest-pep8
@@ -21,6 +21,7 @@ publish:
 	git push --tags
 	python setup.py register
 	python setup.py sdist upload
+	python setup.py bdist_wheel upload
 
 docs-init:
 	pip install -r docs/requirements.txt

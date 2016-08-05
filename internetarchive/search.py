@@ -68,7 +68,7 @@ class Search(object):
         self.sorts = sorts or list()
         self.request_kwargs = request_kwargs or dict()
         self._num_found = None
-        self.scrape_url = '{0}//archive.org/services/search/beta/scrape.php'.format(
+        self.scrape_url = '{0}//archive.org/services/search/v1/scrape'.format(
             self.session.protocol)
         self.search_url = '{0}//archive.org/advancedsearch.php'.format(
             self.session.protocol)
@@ -77,9 +77,14 @@ class Search(object):
         # Initialize params.
         default_params = dict(q=query, REQUIRE_AUTH='true')
         if 'page' not in params:
-            default_params['size'] = 10000
+            default_params['count'] = 10000
         else:
             default_params['output'] = 'json'
+        # In the beta endpoint 'scope' was called 'index'.
+        # Let's support both for a while.
+        if 'index' in params:
+            params['scope'] = params['index']
+            del params['index']
         self.params = default_params.copy()
         self.params.update(params)
 

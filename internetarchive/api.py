@@ -120,6 +120,7 @@ def get_files(identifier,
               files=None,
               formats=None,
               glob_pattern=None,
+              on_the_fly=None,
               **get_item_kwargs):
     """Get :class:`File` objects from an item.
 
@@ -135,6 +136,10 @@ def get_files(identifier,
     :type glob_pattern: str
     :param glob_pattern: (optional) Only return files matching the given glob pattern.
 
+    :type on_the_fly: bool
+    :param on_the_fly: (optional) Include on-the-fly files (i.e. derivative EPUB,
+                       MOBI, DAISY files).
+
     :param \*\*get_item_kwargs: (optional) Arguments that ``get_item()`` takes.
 
     Usage:
@@ -144,7 +149,7 @@ def get_files(identifier,
         ['nasa_reviews.xml', 'nasa_meta.xml', 'nasa_files.xml']
     """
     item = get_item(identifier, **get_item_kwargs)
-    return item.get_files(files, formats, glob_pattern)
+    return item.get_files(files, formats, glob_pattern, on_the_fly)
 
 
 def modify_metadata(identifier, metadata,
@@ -320,7 +325,7 @@ def download(identifier,
     :type checksum: bool
     :param checksum: (optional) Skip downloading file based on checksum.
 
-    :type destdir: bool
+    :type destdir: str
     :param destdir: (optional) Download files to the given directory.
 
     :type no_directory: bool
@@ -515,13 +520,25 @@ def get_username(access_key, secret_key):
     :type secret_key: str
     :param secret_key: IA-S3 secret_key to use when making the given request.
     """
+    j = get_user_info(access_key, secret_key)
+    return j.get('username')
+
+
+def get_user_info(access_key, secret_key):
+    """Returns details about an Archive.org user given an IA-S3 key pair.
+
+    :type access_key: str
+    :param access_key: IA-S3 access_key to use when making the given request.
+
+    :type secret_key: str
+    :param secret_key: IA-S3 secret_key to use when making the given request.
+    """
     u = 'https://s3.us.archive.org'
     p = dict(check_auth=1)
     r = requests.get(u, params=p, auth=auth.S3Auth(access_key, secret_key))
     r.raise_for_status()
     j = r.json()
-    username = j.get('username')
-    if username:
-        return username
-    else:
+    if j.get('error'):
         raise AuthenticationError(j.get('error'))
+    else:
+        return j

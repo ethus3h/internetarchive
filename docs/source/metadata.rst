@@ -143,6 +143,7 @@ The mediatype metadata field recognizes a limited set of values:
   These items will be displayed with an online video player.
 - ``software``: Items with a mediatype of ``software`` are accessible to browse via Internet Archive's `software collection <http://www.archive.org/details/software>`_.
   There is no online viewer for software but all files are available for download.
+- ``texts``: All text items (PDFs, EPUBs, etc.) should receive a mediatype value of ``texts``.
 - ``web``: The ``web`` mediatype value is reserved for items which contain web archive `WARC <http://www.digitalpreservation.gov/formats/fdd/fdd000236.shtml>`_ files.
 
 If the mediatype value you set is not in the list above it will be saved but ignored by the system. The item will be treated as though it has a mediatype value of ``data``.
@@ -171,13 +172,13 @@ The value of this metadata field may contain HTML. ``<script>`` tags and CSS are
 pick
 ^^^^
 
-On the v1 Archive.org site, each collection page on Internet Archive may include a "Staff Picks" section.
+On the v1 archive.org site, each collection page on Internet Archive may include a "Staff Picks" section.
 This section will highlight a single item in the collection.
 This item will be selected at random from the items with a ``pick`` metadata value of ``1``.
 If there are no items with this ``pick`` metadata value the "Staff Picks" section will not appear on the collection page.
 
 By default all new items have no `pick` metadata value.
-**Note:** v2 of the Archive.org website does not make use of this value.
+**Note:** v2 of the archive.org website does not make use of this value.
 
 publicdate
 ^^^^^^^^^^

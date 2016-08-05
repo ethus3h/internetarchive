@@ -36,6 +36,7 @@ try:
 except ImportError:
     from total_ordering import total_ordering
 import json
+from copy import deepcopy
 
 from six import string_types
 from six.moves import urllib
@@ -44,7 +45,7 @@ from clint.textui import progress
 from requests.exceptions import HTTPError
 
 from internetarchive.utils import IdentifierListAsItems, get_md5, chunk_generator, \
-    IterableToFileAdapter
+    IterableToFileAdapter, iter_directory, recursive_file_count
 from internetarchive.files import File
 from internetarchive.iarequest import MetadataRequest, S3Request
 from internetarchive.utils import get_s3_xml_text, get_file_size
@@ -186,20 +187,32 @@ class Item(BaseItem):
         """
         return File(self, file_name)
 
-    def get_files(self, files=None, formats=None, glob_pattern=None):
+    def get_files(self, files=None, formats=None, glob_pattern=None, on_the_fly=None):
         files = [] if not files else files
         formats = [] if not formats else formats
+        on_the_fly = False if not on_the_fly else True
 
         if not isinstance(files, (list, tuple, set)):
             files = [files]
         if not isinstance(formats, (list, tuple, set)):
             formats = [formats]
 
+        item_files = deepcopy(self.files)
+        # Add support for on-the-fly files (e.g. EPUB).
+        if on_the_fly:
+            otf_files = [
+                '{0}.epub'.format(self.identifier),
+                '{0}.mobi'.format(self.identifier),
+                '{0}_daisy.zip'.format(self.identifier),
+            ]
+            for f in otf_files:
+                item_files.append(dict(name=f, otf=True))
+
         if not any(k for k in [files, formats, glob_pattern]):
-            for f in self.files:
+            for f in item_files:
                 yield self.get_file(f.get('name'))
 
-        for f in self.files:
+        for f in item_files:
             if f.get('name') in files:
                 yield self.get_file(f.get('name'))
             elif f.get('format') in formats:
@@ -226,7 +239,8 @@ class Item(BaseItem):
                  no_directory=None,
                  retries=None,
                  item_index=None,
-                 ignore_errors=None):
+                 ignore_errors=None,
+                 on_the_fly=None):
         """Download files from an item.
 
         :param files: (optional) Only download files matching given file names.
@@ -251,6 +265,10 @@ class Item(BaseItem):
         :type no_directory: bool
         :param no_directory: (optional) Download files to current working directory rather
                              than creating an item directory.
+
+        :type on_the_fly: bool
+        :param on_the_fly: (optional) Download on-the-fly files (i.e. derivative EPUB,
+                           MOBI, DAISY files).
 
         :rtype: bool
         :returns: True if if files have been downloaded successfully.
@@ -292,13 +310,13 @@ class Item(BaseItem):
             return
 
         if files:
-            files = self.get_files(files)
+            files = self.get_files(files, on_the_fly=on_the_fly)
         else:
-            files = self.get_files()
+            files = self.get_files(on_the_fly=on_the_fly)
         if formats:
-            files = self.get_files(formats=formats)
+            files = self.get_files(formats=formats, on_the_fly=on_the_fly)
         if glob_pattern:
-            files = self.get_files(glob_pattern=glob_pattern)
+            files = self.get_files(glob_pattern=glob_pattern, on_the_fly=on_the_fly)
 
         if not files:
             msg = 'skipping {0}, no matching files found.'.format(self.identifier)
@@ -637,13 +655,6 @@ class Item(BaseItem):
         :returns: True if the request was successful and all files were
                   uploaded, False otherwise.
         """
-        def iter_directory(directory):
-            for path, dir, files in os.walk(directory):
-                for f in files:
-                    filepath = os.path.join(path, f)
-                    key = os.path.relpath(filepath, directory)
-                    yield (filepath, key)
-
         queue_derive = True if queue_derive is None else queue_derive
         if isinstance(files, dict):
             files = list(files.items())
@@ -652,19 +663,17 @@ class Item(BaseItem):
 
         responses = []
         file_index = 0
+        total_files = recursive_file_count(files)
         for f in files:
-            file_index += 1
             if isinstance(f, string_types) and os.path.isdir(f):
-                fdir_index = 0
                 for filepath, key in iter_directory(f):
+                    file_index += 1
                     # Set derive header if queue_derive is True,
                     # and this is the last request being made.
-                    fdir_index += 1
-                    if queue_derive is True and file_index >= len(files) \
-                            and fdir_index >= len(os.listdir(f)):
-                        queue_derive = True
+                    if queue_derive is True and file_index >= total_files:
+                        _queue_derive = True
                     else:
-                        queue_derive = False
+                        _queue_derive = False
                     if not f.endswith('/'):
                         key = '{0}/{1}'.format(f, key)
                     resp = self.upload_file(filepath,
@@ -673,7 +682,7 @@ class Item(BaseItem):
                                             headers=headers,
                                             access_key=access_key,
                                             secret_key=secret_key,
-                                            queue_derive=queue_derive,
+                                            queue_derive=_queue_derive,
                                             verbose=verbose,
                                             verify=verify,
                                             checksum=checksum,
@@ -684,12 +693,14 @@ class Item(BaseItem):
                                             request_kwargs=request_kwargs)
                     responses.append(resp)
             else:
+                file_index += 1
                 # Set derive header if queue_derive is True,
                 # and this is the last request being made.
-                if queue_derive is True and file_index >= len(files):
-                    queue_derive = True
+                # if queue_derive is True and file_index >= len(files):
+                if queue_derive is True and file_index >= total_files:
+                    _queue_derive = True
                 else:
-                    queue_derive = False
+                    _queue_derive = False
 
                 if not isinstance(f, (list, tuple)):
                     key, body = (None, f)
@@ -703,7 +714,7 @@ class Item(BaseItem):
                                         headers=headers,
                                         access_key=access_key,
                                         secret_key=secret_key,
-                                        queue_derive=queue_derive,
+                                        queue_derive=_queue_derive,
                                         verbose=verbose,
                                         verify=verify,
                                         checksum=checksum,
