@@ -55,7 +55,10 @@ def map2x(func, *iterables):
 
 
 def validate_ia_identifier(string):
-    legal_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-'
+    legal_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-'
+    # periods, underscores, and dashes are legal, but may not be the first
+    # character!
+    assert all(string.startswith(c) is False for c in ['.', '_', '-'])
     assert 80 >= len(string) >= 3
     assert all(c in legal_chars for c in string)
     return True
@@ -177,3 +180,34 @@ def get_file_size(file_obj):
     except IOError:
         size = None
     return size
+
+
+def iter_directory(directory):
+    """Given a directory, yield all files recursivley as a two-tuple (filepath, s3key)"""
+    for path, dir, files in os.walk(directory):
+        for f in files:
+            filepath = os.path.join(path, f)
+            key = os.path.relpath(filepath, directory)
+            yield (filepath, key)
+
+
+def recursive_file_count(files):
+    """Given a filepath or list of filepaths, return the total number of files."""
+    if not isinstance(files, (list, set)):
+        files = [files]
+    total_files = 0
+    for f in files:
+        try:
+            is_dir = os.path.isdir(f)
+        except TypeError:
+            try:
+                f = f[0]
+                is_dir = os.path.isdir(f)
+            except AttributeError:
+                is_dir = False
+        if is_dir:
+            for x, _ in iter_directory(f):
+                total_files += 1
+        else:
+            total_files += 1
+    return total_files
