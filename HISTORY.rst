@@ -3,12 +3,47 @@
 Release History
 ---------------
 
-1.0.4.dev1.b (2016-05-20a21)
-=======
-Merge upstream changes
+1.0.7 (2016-08-02)
+++++++++++++++++++
 
-=======
+**Features and Improvements**
+
+- Added ``internetarchive.api.get_user_info()``. 
+
+1.0.6 (2016-07-14)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed bug where upload was failing on file-like objects (e.g. StringIO objects).
+
+1.0.5 (2016-07-07)
+++++++++++++++++++
+
+**Features and Improvements**
+
+- All metadata writes are now submitted at -5 priority by default.
+  This is friendlier to the archive.org catalog, and should only be changed for one-off metadata writes.
+- Expanded scope of valid identifiers in ``utils.validate_ia_identifier`` (i.e. ``ia upload``).
+  Periods are now allowed.
+  Periods, underscores, and dashes are not allowed as the first character.
+
+1.0.4 (2016-06-28)
+++++++++++++++++++
+
+**Features and Improvements**
+
+- Search now uses the v1 scraping API endpoint.
+- Moved ``internetarchive.item.Item.upload.iter_directory()`` to ``internetarchive.utils``.
+- Added support for downloading "on-the-fly" files (e.g. EPUB, MOBI, and DAISY) via ``ia download <id> --on-the-fly`` or ``item.download(on_the_fly=True)``.
+
+**Bugfixes**
+
+- ``s3_is_overloaded()`` now returns ``True`` if the call is unsuccessful.
+- Fixed bug in upload where a derive task wasn't being queued when a directory is uploaded.
+
 1.0.3 (2016-05-16)
+++++++++++++++++++
 
 **Features and Improvements**
 
@@ -37,38 +72,6 @@ Merge upstream changes
 - Fixed bug in ``ia upload`` where uploading files with unicode file names were failing.
 - Fixed bug in upload where filenames with ``;`` characters were being truncated.
 - Fixed bug in ``internetarchive.catalog`` where TypeError was being raised in Python 3 due to mixing bytes with strings.
-
-1.0.2.3 (2016-04-11a12)
-
-++++++++++++++++++
-
-**Miscellaneous**
-
--Unbreaking it.
-
-
-1.0.2.2 (2016-04-11a12)
-
-++++++++++++++++++
-
-**Features and Improvements**
-
-- Radical retry
-
-**Miscellaneous**
-
--Pull in changes from upstream
-
-1.0.2.1 (2016-03-10)
-++++++++++++++++++
-
-**Features and Improvements**
-
-- Retry on HTTP response codes 500, 501, 502, 503, 504, 400, and 408.
-
-**Miscellaneous**
-
-- Fork of jjjake/internetarchive.
 
 1.0.2 (2016-03-07)
 ++++++++++++++++++
