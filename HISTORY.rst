@@ -42,6 +42,10 @@ Release History
 - ``s3_is_overloaded()`` now returns ``True`` if the call is unsuccessful.
 - Fixed bug in upload where a derive task wasn't being queued when a directory is uploaded.
 
+1.0.4.dev1.b (2016-05-20a21)
+++++++++++++++++++
+Merge upstream changes
+
 1.0.3 (2016-05-16)
 ++++++++++++++++++
 
@@ -72,6 +76,36 @@ Release History
 - Fixed bug in ``ia upload`` where uploading files with unicode file names were failing.
 - Fixed bug in upload where filenames with ``;`` characters were being truncated.
 - Fixed bug in ``internetarchive.catalog`` where TypeError was being raised in Python 3 due to mixing bytes with strings.
+
+1.0.2.3 (2016-04-11a12)
+++++++++++++++++++
+
+**Miscellaneous**
+
+-Unbreaking it.
+
+
+1.0.2.2 (2016-04-11a12)
+++++++++++++++++++
+
+**Features and Improvements**
+
+- Radical retry
+
+**Miscellaneous**
+
+-Pull in changes from upstream
+
+1.0.2.1 (2016-03-10)
+++++++++++++++++++
+
+**Features and Improvements**
+
+- Retry on HTTP response codes 500, 501, 502, 503, 504, 400, and 408.
+
+**Miscellaneous**
+
+- Fork of jjjake/internetarchive.
 
 1.0.2 (2016-03-07)
 ++++++++++++++++++
