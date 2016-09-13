@@ -85,8 +85,8 @@ class BaseItem(object):
         self.load()
 
     def __repr__(self):
-        return ('{0.__class__.__name__}(identifier={identifier!r}, '
-                'exists={exists!r})'.format(self, **self.__dict__))
+        return ('{0.__class__.__name__}(identifier={0.identifier!r}{notloaded})'.format(
+            self, notloaded=', item_metadata={}' if not self.exists else ''))
 
     def load(self, item_metadata=None):
         if item_metadata:
@@ -122,11 +122,12 @@ class BaseItem(object):
 
 
 class Item(BaseItem):
-    """This class represents an archive.org item. You can use this
-    class to access item metadata::
+    """This class represents an archive.org item. Generally this class
+    should not be used directly, but rather via the
+    ``internetarchive.get_item()`` function::
 
-        >>> import internetarchive
-        >>> item = internetarchive.Item('stairs')
+        >>> from internetarchive import get_item
+        >>> item = get_item('stairs')
         >>> print(item.metadata)
 
     Or to modify the metadata for an item::
@@ -246,32 +247,55 @@ class Item(BaseItem):
         :param files: (optional) Only download files matching given file names.
 
         :type formats: str
-        :param formats: (optional) Only download files matching the given Formats.
+        :param formats: (optional) Only download files matching the given
+                        Formats.
 
         :type glob_pattern: str
-        :param glob_pattern: (optional) Only download files matching the given glob
-                             pattern.
+        :param glob_pattern: (optional) Only download files matching the given
+                             glob pattern.
 
-        :type clobber: bool
-        :param clobber: (optional) Overwrite local files if they already exist.
+        :type dry_run: bool
+        :param dry_run: (optional) Output download URLs to stdout, don't
+                        download anything.
 
-        :type no_clobber: bool
-        :param no_clobber: (optional) Do not overwrite local files if they already exist,
-                           or raise an IOError exception.
+        :type verbose: bool
+        :param verbose: (optional) Turn on verbose output.
+
+        :type silent: bool
+        :param silent: (optional) Suppress all output.
+
+        :type ignore_existing: bool
+        :param ignore_existing: (optional) Skip files that already exist
+                                locally.
 
         :type checksum: bool
         :param checksum: (optional) Skip downloading file based on checksum.
 
+        :type destdir: str
+        :param destdir: (optional) The directory to download files to.
+
         :type no_directory: bool
-        :param no_directory: (optional) Download files to current working directory rather
-                             than creating an item directory.
+        :param no_directory: (optional) Download files to current working
+                             directory rather than creating an item directory.
+
+        :type retries: int
+        :param retries: (optional) The number of times to retry on failed
+                        requests.
+
+        :type item_index: int
+        :param item_index: (optional) The index of the item for displaying
+                           progress in bulk downloads.
+
+        :type ignore_errors: bool
+        :param ignore_errors: (optional) Don't fail if a single file fails to
+                              download, continue to download other files.
 
         :type on_the_fly: bool
         :param on_the_fly: (optional) Download on-the-fly files (i.e. derivative EPUB,
                            MOBI, DAISY files).
 
         :rtype: bool
-        :returns: True if if files have been downloaded successfully.
+        :returns: True if if all files have been downloaded successfully.
         """
         dry_run = False if dry_run is None else dry_run
         verbose = False if verbose is None else verbose
