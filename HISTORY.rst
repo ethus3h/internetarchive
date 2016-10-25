@@ -3,8 +3,15 @@
 Release History
 ---------------
 
-1.0.9 (?)
-+++++++++
+1.0.10 (2016-09-20)
++++++++++++++++++++
+
+**Bugfixes**
+
+- Convert x-archive-cascade-delete headers to strings for compatability with ``requests>=2.11.0``.
+
+1.0.9 (2016-08-16)
+++++++++++++++++++
 
 **Features and Improvements**
 
@@ -78,8 +85,11 @@ Merge upstream changes
 - All search requests now require authentication via IA-S3 keys.
   You can run ``ia configure`` to generate a config file that will be used to authenticate all search requests automatically. 
   For more details refer to the following links:
-    http://internetarchive.readthedocs.io/en/latest/quickstart.html?highlight=configure#configuring
-    http://internetarchive.readthedocs.io/en/latest/api.html#configuration
+
+  http://internetarchive.readthedocs.io/en/latest/quickstart.html?highlight=configure#configuring
+
+  http://internetarchive.readthedocs.io/en/latest/api.html#configuration
+
 - Added ability to specify your own filepath in ``ia configure`` and ``internetarchive.configure()``.
 
 **Bugfixes**
