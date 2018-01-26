@@ -72,6 +72,7 @@ from internetarchive.utils import validate_ia_identifier, get_s3_xml_text
 
 def _upload_files(item, files, upload_kwargs, prev_identifier=None, archive_session=None):
     """Helper function for calling :meth:`Item.upload`"""
+    print('Entered CLI _upload_files')
     responses = []
     if (upload_kwargs['verbose']) and (prev_identifier != item.identifier):
         print('{0}:'.format(item.identifier))
@@ -110,6 +111,7 @@ def _upload_files(item, files, upload_kwargs, prev_identifier=None, archive_sess
 
 
 def main(argv, session):
+    print('Entered CLI main')
     if six.PY2:
         args = docopt(__doc__.encode('utf-8'), argv=argv)
     else:

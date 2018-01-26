@@ -555,7 +555,7 @@ class Item(BaseItem):
             ...                  key='photos/image1.jpg')
             True
         """
-        print('Entered upload_file')
+        print('Entered Item.upload_file')
         # Set defaults.
         headers = {} if headers is None else headers
         metadata = {} if metadata is None else metadata
@@ -774,6 +774,7 @@ class Item(BaseItem):
         :rtype: list
         :returns: A list of requests.Response objects.
         """
+        print('Entered Item.upload')
         queue_derive = True if queue_derive is None else queue_derive
         remote_dir_name = None
         if isinstance(files, dict):
