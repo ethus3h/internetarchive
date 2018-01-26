@@ -555,6 +555,7 @@ class Item(BaseItem):
             ...                  key='photos/image1.jpg')
             True
         """
+        print('Entered upload_file')
         # Set defaults.
         headers = {} if headers is None else headers
         metadata = {} if metadata is None else metadata
@@ -583,7 +584,11 @@ class Item(BaseItem):
             else:
                 filename = body.name
 
+        print ('Got name')
+
         size = get_file_size(body)
+
+        print ('Got size')
 
         # Support for uploading empty files.
         if size == 0:
@@ -597,6 +602,8 @@ class Item(BaseItem):
         base_url = '{0.session.protocol}//s3.us.archive.org/{0.identifier}'.format(self)
         url = '{0}/{1}'.format(
             base_url, urllib.parse.quote(norm_filepath(key).lstrip('/').encode('utf-8')))
+
+        print ('Got URL')
 
         # Skip based on checksum.
         if checksum:
@@ -620,14 +627,20 @@ class Item(BaseItem):
                 body.close()
                 return Response()
 
+        print ('checksum passed: target already exists')
+
         # require the Content-MD5 header when delete is True.
         if verify or delete:
             if not md5_sum:
                 md5_sum = get_md5(body)
             headers['Content-MD5'] = md5_sum
 
+        print ('Declaring _build_request')
+
         def _build_request():
+            print ('Entered _build_request')
             body.seek(0, os.SEEK_SET)
+            print ('Did body.seek')
             if verbose:
                 try:
                     # hack to raise exception so we get some output for
@@ -648,8 +661,10 @@ class Item(BaseItem):
                     data = body
             else:
                 data = body
+            print ('Got data')
 
             headers.update(self.session.headers)
+            print ('Headers updated')
             request = S3Request(method='PUT',
                                 url=url,
                                 headers=headers,
@@ -658,6 +673,7 @@ class Item(BaseItem):
                                 access_key=access_key,
                                 secret_key=secret_key,
                                 queue_derive=queue_derive)
+            print ('Ready to return')
             return request
 
         if debug:
