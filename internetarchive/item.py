@@ -782,6 +782,7 @@ class Item(BaseItem):
         if not isinstance(files, (list, tuple)):
             files = [files]
 
+        print('Made files.list')
         responses = []
         file_index = 0
         if checksum:
@@ -789,12 +790,16 @@ class Item(BaseItem):
         else:
             total_files = recursive_file_count(files, item=self, checksum=False)
         for f in files:
+            print('Working on file', f)
             if (isinstance(f, string_types) and os.path.isdir(f)) \
                     or (os.path.isdir(f[-1])):
+                print('is directory')
                 if isinstance(f, tuple):
+                    print('Is tuple')
                     remote_dir_name = f[0].strip('/')
                     f = f[-1]
                 for filepath, key in iter_directory(f):
+                    print('For filepath, key')
                     file_index += 1
                     # Set derive header if queue_derive is True,
                     # and this is the last request being made.
@@ -810,6 +815,7 @@ class Item(BaseItem):
                     elif remote_dir_name:
                         key = '{0}/{1}'.format(remote_dir_name, key)
                     key = norm_filepath(key)
+                    print('Calling upload_file')
                     resp = self.upload_file(filepath,
                                             key=key,
                                             metadata=metadata,
@@ -827,6 +833,7 @@ class Item(BaseItem):
                                             request_kwargs=request_kwargs)
                     responses.append(resp)
             else:
+                print('Is not directory')
                 file_index += 1
                 # Set derive header if queue_derive is True,
                 # and this is the last request being made.
@@ -840,8 +847,10 @@ class Item(BaseItem):
                     key, body = (None, f)
                 else:
                     key, body = f
+                print('Got key, body')
                 if key and not isinstance(key, string_types):
                     key = str(key)
+                print('Calling _upload_file')
                 resp = self.upload_file(body,
                                         key=key,
                                         metadata=metadata,
